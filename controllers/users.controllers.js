@@ -15,11 +15,19 @@ export const getUsers = async(req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-        const [result] = await pool.query('SELECT * FROM pruebas WHERE id = ?', [req.params.id]);
-    
+        let [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ?', [req.params.cedula]);
+        
         if (!result.length) {
             return res.status(404).json({
                 message: "Usuario no encontrado"
+            })
+        }
+
+        [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ? AND password = ?', [req.params.cedula, req.params.password]);
+        
+        if(!result.length) {
+            return res.status(404).json({
+                message: "Credenciales invalidas"
             })
         }
     
