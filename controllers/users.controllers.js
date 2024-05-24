@@ -34,24 +34,34 @@ export const getUser = async (req, res) => {
 
 export const createUser = async(req, res) => {
     try {
-        const {title, description} = req.body;
+        const {cedula, nombre, direccion, telefono, email, password} = req.body;
+
+        const isEmpty = Object.values(values).some(x => (x === ''));
+
+        if ( isEmpty) {
+            throw new Error("Los campos son obligatorios");
+        }
+
         const [result] = await pool.query(
-            "INSERT INTO pruebas(title, description) VALUES (?, ?)",
+            "INSERT INTO usuarios(cedula, nombre, direccion, telefono, email, password) VALUES (?, ?, ?, ?, ?, ?)",
             [
-                title,
-                description,
+                cedula, nombre, direccion, telefono, email, password
             ]
         );
-    
+
         res.json({
-            id: result.insertId,
-            title,
-            description
+            cedula, nombre, direccion, telefono, email, password
         })
 
     } catch (error) {
+        const message = error.message.includes("usuarios.email")
+            ? "Ya existe una cuenta con este email"
+            : error.message.includes("usuarios.PRIMARY")
+                ? "Ya existe una cuenta con esta cedula"
+                : error.message;
+
         return res.status(500).json({
-            message: error.message
+            message
         }) 
     }
 }
