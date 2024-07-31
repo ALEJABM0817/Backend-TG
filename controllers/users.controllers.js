@@ -1,5 +1,5 @@
 import { pool } from "../db.js"
-
+import { generarJWT } from '../helpers/jwt.js';
 export const getUsers = async(req, res) => {
     try {
         const [result] = await pool.query("SELECT * FROM usuarios ORDER BY createdAt ASC");
@@ -30,8 +30,12 @@ export const getUser = async (req, res) => {
                 message: "Credenciales invalidas"
             })
         }
-    
-        res.json(result[0]);
+        const token = await generarJWT(result[0].cedula, result[0].nombre)
+
+        res.json({
+            ...result[0],
+            token
+        });
 
     } catch (error) {
         return res.status(500).json({
@@ -109,4 +113,18 @@ export const deleteUser = async (req, res) => {
             message: error.message
         }) 
     }
+}
+
+export const revalidarToken = async(req, res) => {
+    const cedula = req.cedula;
+    const name = req.name;
+
+   const token = await generarJWT(cedula, name)
+
+    return res.json({
+        ok: true,
+        cedula,
+        name,
+        token
+    })
 }
