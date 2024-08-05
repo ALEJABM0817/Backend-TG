@@ -15,7 +15,8 @@ export const getUsers = async(req, res) => {
 
 export const getUser = async (req, res) => {
     try {
-        let [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ?', [req.params.cedula]);
+        const {cedula, password} = req.body;
+        let [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ?', [cedula]);
         
         if (!result.length) {
             return res.status(404).json({
@@ -23,7 +24,7 @@ export const getUser = async (req, res) => {
             })
         }
 
-        [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ? AND password = ?', [req.params.cedula, req.params.password]);
+        [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ? AND password = ?', [cedula, password]);
         
         if(!result.length) {
             return res.status(404).json({
