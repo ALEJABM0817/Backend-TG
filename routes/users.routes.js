@@ -5,7 +5,8 @@ import {
     updateUser,
     createUser,
     deleteUser,
-    revalidarToken
+    revalidarToken,
+    getCompleteInfo
 } from '../controllers/users.controllers.js';
 import {validarJWT} from '../middlewares/validar-jwt.js'
 
@@ -16,6 +17,7 @@ router.post('/auth', getUser);
 router.post('/user', createUser);
 router.put('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
+router.post('/is-complete-info', getCompleteInfo);
 
 router.get('/renew', validarJWT, revalidarToken)
 
