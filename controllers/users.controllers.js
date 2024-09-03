@@ -31,7 +31,10 @@ export const getUser = async (req, res) => {
                 message: "Credenciales invalidas"
             })
         }
-        const token = await generarJWT(result[0].cedula, result[0].nombre, result[0].type_user);
+
+        console.log(result[0])
+
+        const token = await generarJWT(result[0].cedula, result[0].nombre, result[0].typeUser);
 
         res.json({
             ...result[0],
@@ -56,7 +59,7 @@ export const createUser = async (req, res) => {
         }
 
         const [result] = await pool.query(
-            "INSERT INTO usuarios(cedula, nombre, direccion, telefono, email, password, type_user) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO usuarios(cedula, nombre, direccion, telefono, email, password, typeUser) VALUES (?, ?, ?, ?, ?, ?, ?)",
             [
                 cedula, nombre, direccion, telefono, email, password, typeUser
             ]
@@ -71,11 +74,11 @@ export const createUser = async (req, res) => {
             )
         }
 
-        const token = await generarJWT(cedula, nombre);
+        const token = await generarJWT(cedula, nombre, typeUser);
 
         res.json(
             {
-                cedula, nombre, direccion, telefono, email, password, token
+                cedula, nombre, direccion, telefono, email, password, token, typeUser
             }
         )
 
@@ -132,16 +135,16 @@ export const deleteUser = async (req, res) => {
 export const revalidarToken = async (req, res) => {
     const cedula = req.cedula;
     const name = req.name;
-    const type_user = req.typeUser;
+    const typeUser = req.typeUser;
 
-    const token = await generarJWT(cedula, name, type_user)
+    const token = await generarJWT(cedula, name, typeUser)
 
     return res.json({
         ok: true,
         cedula,
         name,
         token,
-        type_user
+        typeUser
     })
 }
 
