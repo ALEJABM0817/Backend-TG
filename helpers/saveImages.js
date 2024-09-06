@@ -25,14 +25,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/upload-data', upload.single('photo'), async (req, res) => {
-    console.log(req.file);
-    helperImg(req.file.path, `resize-${req.file.filename}`);
+    // helperImg(req.file.path, `resize-${req.file.filename}`);
 
     try {
-        console.log(req.body);
-        const { cedula, experiences, hasExperience } = req.body;
+        const { cedula, experiences, hasExperience, areas } = req.body;
         const photo = req.file.filename;
-        await pool.query('INSERT INTO ofertantes (cedula, photo, complete_info) VALUES (?, ?, TRUE) ON DUPLICATE KEY UPDATE photo = VALUES(photo), complete_info = VALUES(complete_info)', [cedula, photo]);
+        const areasString = JSON.stringify(areas);
+
+        await pool.query('INSERT INTO ofertantes (cedula, photo, complete_info, areas) VALUES (?, ?, TRUE, ?) ON DUPLICATE KEY UPDATE photo = VALUES(photo), complete_info = VALUES(complete_info), areas = VALUES(areas)', [cedula, photo, areasString]);
 
         const hasExperienceInt = hasExperience === 'true' ? 1 : 0;
 

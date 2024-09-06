@@ -32,8 +32,6 @@ export const getUser = async (req, res) => {
             })
         }
 
-        console.log(result[0])
-
         const token = await generarJWT(result[0].cedula, result[0].nombre, result[0].typeUser);
 
         res.json({
@@ -163,5 +161,48 @@ export const getCompleteInfo = async (req, res) => {
         );
     } catch (error) {
         console.log(error)
+    }
+}
+
+export const getOfertantantes = async (req, res) => {
+    try {
+        const [result] = await pool.query('SELECT * FROM ofertantes');
+        res.json(result);
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        })
+    }
+}
+
+export const getOfertanteForCV = async (req, res) => {
+    try {
+        const cedula = req.body.cedula;
+        const [rows] = await pool.query(`
+            SELECT o.photo, e.*
+            FROM ofertantes o
+            LEFT JOIN experiencia e ON o.cedula = e.cedula
+            WHERE o.cedula = ?
+        `, [cedula]);
+    
+        const result = {
+            cedula: cedula,
+            photo: rows[0]?.photo,
+            hasExperience: rows[0]?.hasExperience,
+            experiences: rows.map(row => ({
+                id: row.id,
+                title: row.title,
+                company: row.company,
+                startDate: row.startDate,
+                isCurrent: row.isCurrent,
+                endDate: row.endDate,
+                responsibilities: row.responsibilities
+            }))
+        };
+
+        res.json(result);
+    } catch (error) {
+        
     }
 }

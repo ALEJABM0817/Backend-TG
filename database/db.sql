@@ -1,5 +1,5 @@
 CREATE TABLE usuarios (
-    cedula INTEGER PRIMARY KEY NOT NULL UNIQUE,
+    cedula BIGINT PRIMARY KEY NOT NULL UNIQUE,
     nombre VARCHAR(100) NOT NULL,
     direccion VARCHAR(100) NOT NULL,
     telefono VARCHAR(10) NOT NULL,
@@ -13,8 +13,23 @@ CREATE TABLE ofertantes (
     cedula INTEGER PRIMARY KEY NOT NULL,
     complete_info BOOLEAN NOT NULL DEFAULT FALSE,
     photo VARCHAR(255),
+    areas VARCHAR(255) NOT NULL,
     FOREIGN KEY (cedula) REFERENCES usuarios(cedula)
 );
+
+-- ALTER TABLE ofertantes ADD COLUMN areas TEXT;
+-- Eliminar las restricciones de clave foránea
+-- ALTER TABLE experiencia DROP FOREIGN KEY experiencia_ibfk_1;
+-- ALTER TABLE ofertantes DROP FOREIGN KEY ofertantes_ibfk_1;
+
+-- Cambiar el tipo de datos
+-- ALTER TABLE usuarios MODIFY cedula BIGINT NOT NULL UNIQUE;
+-- ALTER TABLE ofertantes MODIFY cedula BIGINT NOT NULL;
+-- ALTER TABLE experiencia MODIFY cedula BIGINT;
+
+-- Volver a crear las restricciones de clave foránea
+-- ALTER TABLE experiencia ADD CONSTRAINT experiencia_ibfk_1 FOREIGN KEY (cedula) REFERENCES usuarios(cedula);
+-- ALTER TABLE ofertantes ADD CONSTRAINT ofertantes_ibfk_1 FOREIGN KEY (cedula) REFERENCES usuarios(cedula);
 
 CREATE TABLE experiencia (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
