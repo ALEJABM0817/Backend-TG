@@ -46,6 +46,25 @@ export const getUser = async (req, res) => {
     }
 }
 
+export const getUserData = async (req, res) => {
+    try {
+        const cedula = req.headers.cedula;
+        const [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ?', [cedula]);
+
+        if (!result.length) {
+            return res.status(404).json({
+                message: "Usuario no encontrado"
+            })
+        }
+
+        res.json(result[0]);
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        })
+    }
+}
+
 export const createUser = async (req, res) => {
     try {
         const { cedula, nombre, direccion, telefono, email, password, typeUser} = req.body;

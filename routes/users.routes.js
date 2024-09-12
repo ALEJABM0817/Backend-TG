@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
     getUsers,
     getUser,
+    getUserData,
     updateUser,
     createUser,
     deleteUser,
@@ -16,9 +17,10 @@ const router = Router();
 
 router.get('/users', getUsers);
 router.post('/auth', getUser);
+router.get('/get-user', getUserData);
 router.post('/user', createUser);
-router.put('/users/:id', updateUser);
-router.delete('/users/:id', deleteUser);
+router.put('/user/:id', updateUser);
+router.delete('/user/:id', deleteUser);
 router.post('/is-complete-info', getCompleteInfo);
 router.get('/ofertantes', getOfertantantes);
 router.post('/ofertanteCV', getOfertanteForCV);
