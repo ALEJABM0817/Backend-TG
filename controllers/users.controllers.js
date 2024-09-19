@@ -114,9 +114,9 @@ export const createUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     try {
-        const result = await pool.query("UPDATE usuarios SET ? WHERE id = ?", [
+        const result = await pool.query("UPDATE usuarios SET ? WHERE cedula = ?", [
             req.body,
-            req.params.id
+            req.body.cedula
         ])
 
         res.json(result)
@@ -199,15 +199,17 @@ export const getOfertanteForCV = async (req, res) => {
     try {
         const cedula = req.body.cedula;
         const [rows] = await pool.query(`
-            SELECT o.photo, e.*
+            SELECT o.photo, e.*, u.nombre
             FROM ofertantes o
             LEFT JOIN experiencia e ON o.cedula = e.cedula
+            LEFT JOIN usuarios u ON o.cedula = u.cedula
             WHERE o.cedula = ?
         `, [cedula]);
     
         const result = {
             cedula: cedula,
             photo: rows[0]?.photo,
+            nombre: rows[0]?.nombre,
             hasExperience: rows[0]?.hasExperience,
             experiences: rows.map(row => ({
                 id: row.id,
@@ -222,6 +224,8 @@ export const getOfertanteForCV = async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        
+        req.status(500).json({
+            message: error.message
+        })
     }
 }

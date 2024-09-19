@@ -17,20 +17,6 @@ CREATE TABLE ofertantes (
     FOREIGN KEY (cedula) REFERENCES usuarios(cedula)
 );
 
--- ALTER TABLE ofertantes ADD COLUMN areas TEXT;
--- Eliminar las restricciones de clave foránea
--- ALTER TABLE experiencia DROP FOREIGN KEY experiencia_ibfk_1;
--- ALTER TABLE ofertantes DROP FOREIGN KEY ofertantes_ibfk_1;
-
--- Cambiar el tipo de datos
--- ALTER TABLE usuarios MODIFY cedula BIGINT NOT NULL UNIQUE;
--- ALTER TABLE ofertantes MODIFY cedula BIGINT NOT NULL;
--- ALTER TABLE experiencia MODIFY cedula BIGINT;
-
--- Volver a crear las restricciones de clave foránea
--- ALTER TABLE experiencia ADD CONSTRAINT experiencia_ibfk_1 FOREIGN KEY (cedula) REFERENCES usuarios(cedula);
--- ALTER TABLE ofertantes ADD CONSTRAINT ofertantes_ibfk_1 FOREIGN KEY (cedula) REFERENCES usuarios(cedula);
-
 CREATE TABLE experiencia (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     cedula INTEGER,
@@ -42,4 +28,29 @@ CREATE TABLE experiencia (
     endDate DATE,
     responsibilities TEXT,
     FOREIGN KEY (cedula) REFERENCES usuarios(cedula)
+);
+
+CREATE TABLE servicios (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- INSERT INTO servicios (nombre) VALUES ('Jardineria'), ('Plomeria'), ('Limpieza'), ('Lavanderia');
+
+CREATE TABLE tipos_tarifas (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- INSERT INTO tipos_tarifas (nombre) VALUES ('media_jornada'), ('jornada_completa');
+
+CREATE TABLE tarifas (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    cedula BIGINT,
+    servicio_id INTEGER,
+    tipo_tarifa_id INTEGER,
+    precio DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (cedula) REFERENCES usuarios(cedula),
+    FOREIGN KEY (servicio_id) REFERENCES servicios(id),
+    FOREIGN KEY (tipo_tarifa_id) REFERENCES tipos_tarifas(id)
 );
