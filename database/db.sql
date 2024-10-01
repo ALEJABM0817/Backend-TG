@@ -35,14 +35,10 @@ CREATE TABLE servicios (
     nombre VARCHAR(100) NOT NULL UNIQUE
 );
 
--- INSERT INTO servicios (nombre) VALUES ('Jardineria'), ('Plomeria'), ('Limpieza'), ('Lavanderia');
-
 CREATE TABLE tipos_tarifas (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100) NOT NULL UNIQUE
 );
-
--- INSERT INTO tipos_tarifas (nombre) VALUES ('media_jornada'), ('jornada_completa');
 
 CREATE TABLE tarifas (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -53,4 +49,27 @@ CREATE TABLE tarifas (
     FOREIGN KEY (cedula) REFERENCES usuarios(cedula),
     FOREIGN KEY (servicio_id) REFERENCES servicios(id),
     FOREIGN KEY (tipo_tarifa_id) REFERENCES tipos_tarifas(id)
+);
+
+CREATE TABLE solicitudes (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    idOfertante BIGINT,
+    idSolicitante BIGINT,
+    servicio_id INTEGER,
+    tipo_tarifa_id INTEGER,
+    plan INTEGER,
+    precio DECIMAL(10, 2) NOT NULL,
+    fecha DATE,
+    status VARCHAR(50) DEFAULT 'No realizada',
+    FOREIGN KEY (idOfertante) REFERENCES usuarios(cedula),
+    FOREIGN KEY (idSolicitante) REFERENCES usuarios(cedula),
+    FOREIGN KEY (servicio_id) REFERENCES servicios(id),
+    FOREIGN KEY (tipo_tarifa_id) REFERENCES tipos_tarifas(id)
+);
+
+CREATE TABLE fechas_solicitudes (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    solicitud_id INTEGER,
+    fecha DATE,
+    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id)
 );

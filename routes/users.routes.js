@@ -9,7 +9,11 @@ import {
     revalidarToken,
     getCompleteInfo,
     getOfertantantes,
-    getOfertanteForCV
+    getOfertanteForCV,
+    getTarifas,
+    updateTarifas,
+    createServiceRequest,
+    getServices
 } from '../controllers/users.controllers.js';
 import {validarJWT} from '../middlewares/validar-jwt.js'
 
@@ -25,5 +29,9 @@ router.post('/is-complete-info', getCompleteInfo);
 router.get('/ofertantes', getOfertantantes);
 router.post('/ofertanteCV', getOfertanteForCV);
 router.get('/renew', validarJWT, revalidarToken)
+router.get(('/tarifas'), getTarifas)
+router.put('/tarifas-update/:id', updateTarifas)
+router.post('/service', createServiceRequest)
+router.get('/get-services', getServices)
 
 export default router;
