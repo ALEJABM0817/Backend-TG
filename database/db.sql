@@ -71,5 +71,6 @@ CREATE TABLE fechas_solicitudes (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     solicitud_id INTEGER,
     fecha DATE,
+    turno VARCHAR(50),
     FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id)
 );

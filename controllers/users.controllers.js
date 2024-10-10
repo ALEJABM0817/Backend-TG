@@ -318,10 +318,11 @@ export const createServiceRequest = async (req, res) => {
             const solicitud_id = result.insertId;
 
             for (let j = 0; j < fechas.length; j++) {
+                const { fecha, turno } = fechas[j];
                 await pool.query(
-                    "INSERT INTO fechas_solicitudes(solicitud_id, fecha) VALUES (?, ?)",
+                    "INSERT INTO fechas_solicitudes(solicitud_id, fecha, turno) VALUES (?, ?, ?)",
                     [
-                        solicitud_id, fechas[j]
+                        solicitud_id, fecha, turno
                     ]
                 );
             }
@@ -342,8 +343,8 @@ export const getServices = async (req, res) => {
     try {
         const { cedula, typeuser } = req.headers;
         let query = 
-            "SELECT s.id, s.idOfertante, s.idSolicitante, s.servicio_id, s.tipo_tarifa_id, s.plan, s.precio, f.fecha, u.nombre, u.email, u.telefono, " +
-            "tp.nombre as tipo_tarifa, se.nombre as servicio " +
+            "SELECT s.id, s.idOfertante, s.idSolicitante, s.servicio_id, s.tipo_tarifa_id, s.plan, s.precio, u.nombre, u.email, u.telefono, " +
+            "tp.nombre as tipo_tarifa, se.nombre as servicio, GROUP_CONCAT(f.fecha) as fechas, GROUP_CONCAT(f.turno) as turnos " +
             "FROM solicitudes s " +
             "JOIN fechas_solicitudes f ON s.id = f.solicitud_id " +
             "JOIN usuarios u ON s.idOfertante = u.cedula " +
@@ -351,16 +352,25 @@ export const getServices = async (req, res) => {
             "JOIN servicios se ON s.servicio_id = se.id ";
 
         if (typeuser === 'solicitante') {
-            query += " WHERE s.idSolicitante = ?";
+            query += "WHERE s.idSolicitante = ? ";
         } else if (typeuser === 'ofertante') {
-            query += " WHERE s.idOfertante = ?";
+            query += "WHERE s.idOfertante = ? ";
         } else {
             return res.status(400).json({
                 message: "Invalid typeUser"
             });
         }
 
+        query += "GROUP BY s.id";
+
         const [solicitudes] = await pool.query(query, [cedula]);
+
+        solicitudes.forEach(solicitud => {
+            const fechas = solicitud.fechas ? solicitud.fechas.split(',') : [];
+            const turnos = solicitud.turnos ? solicitud.turnos.split(',') : [];
+            solicitud.fechas = fechas.map((fecha, index) => ({ fecha, turno: turnos[index] }));
+        });
+
         res.json(solicitudes);
         
     } catch (error) {
