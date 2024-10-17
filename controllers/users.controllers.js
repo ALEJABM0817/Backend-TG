@@ -272,6 +272,8 @@ export const getTarifas = async (req, res) => {
             return acc;
         }, []);
 
+        console.log(grouped);
+
         res.json(grouped);
     } catch (error) {
         res.status(500).json({
@@ -375,6 +377,8 @@ export const getServices = async (req, res) => {
             const turnos = solicitud.turnos ? solicitud.turnos.split(',') : [];
             solicitud.fechas = fechas.map((fecha, index) => ({ fecha, turno: turnos[index] }));
         });
+
+        console.log(solicitudes);
 
         res.json(solicitudes);
         
