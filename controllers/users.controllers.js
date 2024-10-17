@@ -185,7 +185,12 @@ export const getCompleteInfo = async (req, res) => {
 
 export const getOfertantantes = async (req, res) => {
     try {
-        const [result] = await pool.query('SELECT * FROM ofertantes');
+        const [result] = await pool.query(
+            'SELECT o.*, AVG(r.calificacion) as promedio_calificacion ' +
+            'FROM ofertantes o ' +
+            'LEFT JOIN rating r ON o.cedula = r.cedula_ofertante ' +
+            'GROUP BY o.cedula'
+        );
         res.json(result);
 
     } catch (error) {
@@ -306,12 +311,12 @@ export const createServiceRequest = async (req, res) => {
         const solicitudes = req.body;
 
         for (let i = 0; i < solicitudes.length; i++) {
-            const { idOfertante, idSolicitante, servicio_id, tipo_tarifa_id, plan, precio, fechas } = solicitudes[i];
+            const { idOfertante, idSolicitante, servicio_id, tipo_tarifa_id, plan, precio, fechas, comentario } = solicitudes[i];
 
             const [result] = await pool.query(
-                "INSERT INTO solicitudes(idOfertante, idSolicitante, servicio_id, tipo_tarifa_id, plan, precio) VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO solicitudes(idOfertante, idSolicitante, servicio_id, tipo_tarifa_id, plan, precio, comentario) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [
-                    idOfertante, idSolicitante, servicio_id, tipo_tarifa_id, plan, precio
+                    idOfertante, idSolicitante, servicio_id, tipo_tarifa_id, plan, precio, comentario
                 ]
             );
 
@@ -343,7 +348,7 @@ export const getServices = async (req, res) => {
     try {
         const { cedula, typeuser } = req.headers;
         let query = 
-            "SELECT s.id, s.idOfertante, s.idSolicitante, s.servicio_id, s.tipo_tarifa_id, s.plan, s.precio, u.nombre, u.email, u.telefono, " +
+            "SELECT s.id, s.idOfertante, s.idSolicitante, s.servicio_id, s.tipo_tarifa_id, s.plan, s.precio, s.comentario, s.status, u.nombre, u.email, u.telefono, " +
             "tp.nombre as tipo_tarifa, se.nombre as servicio, GROUP_CONCAT(f.fecha) as fechas, GROUP_CONCAT(f.turno) as turnos " +
             "FROM solicitudes s " +
             "JOIN fechas_solicitudes f ON s.id = f.solicitud_id " +
@@ -379,3 +384,23 @@ export const getServices = async (req, res) => {
         });
     }
 }
+
+export const setRating = async (req, res) => {
+    const { service_id, idSolicitante, idOfertante, calificacion, comentario } = req.body;
+    try {
+        await pool.query(
+            "INSERT INTO rating (solicitud_id, cedula_solicitante, cedula_ofertante, calificacion, comentario) VALUES (?, ?, ?, ?, ?)",
+            [service_id, idSolicitante, idOfertante, calificacion, comentario]
+        );
+
+        await pool.query(
+            "UPDATE solicitudes SET status = 'Realizado' WHERE id = ?",
+            [service_id]
+        );
+
+        res.status(200).json({ message: "Rating set successfully." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "An error occurred while setting the rating." });
+    }
+};

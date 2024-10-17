@@ -13,7 +13,8 @@ import {
     getTarifas,
     updateTarifas,
     createServiceRequest,
-    getServices
+    getServices,
+    setRating
 } from '../controllers/users.controllers.js';
 import {validarJWT} from '../middlewares/validar-jwt.js'
 
@@ -33,5 +34,6 @@ router.get(('/tarifas'), getTarifas)
 router.put('/tarifas-update/:id', updateTarifas)
 router.post('/service', createServiceRequest)
 router.get('/get-services', getServices)
+router.post('/set-rating', setRating)
 
 export default router;

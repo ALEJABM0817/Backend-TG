@@ -60,7 +60,8 @@ CREATE TABLE solicitudes (
     plan INTEGER,
     precio DECIMAL(10, 2) NOT NULL,
     fecha DATE,
-    status VARCHAR(50) DEFAULT 'No realizada',
+    status VARCHAR(50) DEFAULT 'Pendiente',
+    comentario TEXT,
     FOREIGN KEY (idOfertante) REFERENCES usuarios(cedula),
     FOREIGN KEY (idSolicitante) REFERENCES usuarios(cedula),
     FOREIGN KEY (servicio_id) REFERENCES servicios(id),
@@ -73,4 +74,16 @@ CREATE TABLE fechas_solicitudes (
     fecha DATE,
     turno VARCHAR(50),
     FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id)
+);
+
+CREATE TABLE rating (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    solicitud_id INTEGER,
+    cedula_solicitante BIGINT,
+    cedula_ofertante BIGINT,
+    calificacion DECIMAL(3, 2) NOT NULL,
+    comentario TEXT,
+    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id),
+    FOREIGN KEY (cedula_solicitante) REFERENCES usuarios(cedula),
+    FOREIGN KEY (cedula_ofertante) REFERENCES usuarios(cedula)
 );
