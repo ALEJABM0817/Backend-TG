@@ -2,14 +2,14 @@ import { pool } from "../db.js"
 import { generarJWT } from '../helpers/jwt.js';
 export const getUsers = async (req, res) => {
     try {
-        const [result] = await pool.query("SELECT * FROM usuarios ORDER BY createdAt ASC");
+        const [result] = await pool.query("SELECT * FROM usuarios WHERE typeUser != 'admin' ORDER BY createdAt ASC");
 
         res.json(result);
 
     } catch (error) {
         return res.status(500).json({
             message: error.message
-        })
+        });
     }
 }
 
@@ -18,7 +18,7 @@ export const getUser = async (req, res) => {
         const { cedula, password } = req.body;
         let [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ?', [cedula]);
 
-        if (!result.length) {
+        if (!result.length) { 
             return res.status(404).json({
                 message: "Usuario no encontrado"
             })
@@ -32,7 +32,15 @@ export const getUser = async (req, res) => {
             })
         }
 
-        const token = await generarJWT(result[0].cedula, result[0].nombre, result[0].typeUser);
+        [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ? AND password = ? AND habilitado = 1', [cedula, password]);
+
+        if (!result.length) {
+            return res.status(403).json({
+                message: "Usuario deshabilitado"
+            });
+        }
+
+        const token = await generarJWT(result[0].cedula, result[0].nombre, result[0].typeUser, result[0].direccion);
 
         res.json({
             ...result[0],
@@ -91,7 +99,7 @@ export const createUser = async (req, res) => {
             )
         }
 
-        const token = await generarJWT(cedula, nombre, typeUser);
+        const token = await generarJWT(cedula, nombre, typeUser, direccion);
 
         res.json(
             {
@@ -153,15 +161,16 @@ export const revalidarToken = async (req, res) => {
     const cedula = req.cedula;
     const name = req.name;
     const typeUser = req.typeUser;
-
-    const token = await generarJWT(cedula, name, typeUser)
+    const direccion = req.direccion;
+    const token = await generarJWT(cedula, name, typeUser, direccion)
 
     return res.json({
         ok: true,
         cedula,
         name,
         token,
-        typeUser
+        typeUser,
+        direccion
     })
 }
 
@@ -349,26 +358,29 @@ export const createServiceRequest = async (req, res) => {
 export const getServices = async (req, res) => {
     try {
         const { cedula, typeuser } = req.headers;
+
+        console.log(cedula, typeuser);
+
         let query = 
-            "SELECT s.id, s.idOfertante, s.idSolicitante, s.servicio_id, s.tipo_tarifa_id, s.plan, s.precio, s.comentario, s.status, u.nombre, u.email, u.telefono, " +
+            "SELECT s.id, s.idOfertante, s.idSolicitante, s.servicio_id, s.tipo_tarifa_id, s.plan, s.precio, s.comentario, s.status, " +
+            "u.nombre, u.email, u.telefono, u.direccion, " +
             "tp.nombre as tipo_tarifa, se.nombre as servicio, GROUP_CONCAT(f.fecha) as fechas, GROUP_CONCAT(f.turno) as turnos " +
             "FROM solicitudes s " +
             "JOIN fechas_solicitudes f ON s.id = f.solicitud_id " +
-            "JOIN usuarios u ON s.idOfertante = u.cedula " +
             "JOIN tipos_tarifas tp ON s.tipo_tarifa_id = tp.id " +
             "JOIN servicios se ON s.servicio_id = se.id ";
 
         if (typeuser === 'solicitante') {
-            query += "WHERE s.idSolicitante = ? ";
+            query += "JOIN usuarios u ON s.idOfertante = u.cedula WHERE s.idSolicitante = ? ";
         } else if (typeuser === 'ofertante') {
-            query += "WHERE s.idOfertante = ? ";
+            query += "JOIN usuarios u ON s.idSolicitante = u.cedula WHERE s.idOfertante = ? ";
         } else {
             return res.status(400).json({
                 message: "Invalid typeUser"
             });
         }
 
-        query += "GROUP BY s.id";
+        query += "GROUP BY s.id ORDER BY MAX(f.fecha) DESC";
 
         const [solicitudes] = await pool.query(query, [cedula]);
 
@@ -377,8 +389,6 @@ export const getServices = async (req, res) => {
             const turnos = solicitud.turnos ? solicitud.turnos.split(',') : [];
             solicitud.fechas = fechas.map((fecha, index) => ({ fecha, turno: turnos[index] }));
         });
-
-        console.log(solicitudes);
 
         res.json(solicitudes);
         
@@ -406,5 +416,20 @@ export const setRating = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "An error occurred while setting the rating." });
+    }
+};
+
+export const toggleUsuarioHabilitado = async (req, res) => {
+    const { cedula, habilitado } = req.body;
+    try {
+        await pool.query(
+            "UPDATE usuarios SET habilitado = ? WHERE cedula = ?",
+            [habilitado, cedula]
+        );
+
+        res.status(200).json({ message: "Usuario actualizado exitosamente." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Ocurrió un error al actualizar el estado del usuario." });
     }
 };

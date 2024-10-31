@@ -6,8 +6,15 @@ CREATE TABLE usuarios (
     email VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(50) NOT NULL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    typeUser VARCHAR(50) NOT NULL
+    typeUser VARCHAR(50) NOT NULL,
+    habilitado BOOLEAN NOT NULL DEFAULT TRUE
 );
+
+-- ALTER TABLE usuarios
+-- ADD COLUMN habilitado BOOLEAN NOT NULL DEFAULT TRUE;
+
+-- INSERT INTO usuarios (cedula, nombre, direccion, telefono, email, password, typeUser, habilitado)
+-- VALUES (1234567890, 'Admin User', '123 Admin St', '1234567890', 'admin@example.com', 'securepassword', 'admin', 1);
 
 CREATE TABLE ofertantes (
     cedula INTEGER PRIMARY KEY NOT NULL,

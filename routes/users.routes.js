@@ -14,7 +14,8 @@ import {
     updateTarifas,
     createServiceRequest,
     getServices,
-    setRating
+    setRating,
+    toggleUsuarioHabilitado
 } from '../controllers/users.controllers.js';
 import {validarJWT} from '../middlewares/validar-jwt.js'
 
@@ -35,5 +36,6 @@ router.put('/tarifas-update/:id', updateTarifas)
 router.post('/service', createServiceRequest)
 router.get('/get-services', getServices)
 router.post('/set-rating', setRating)
+router.put('/toggle-users', toggleUsuarioHabilitado);
 
 export default router;

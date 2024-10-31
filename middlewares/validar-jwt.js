@@ -20,6 +20,7 @@ export const validarJWT = (req, res = response, next) => {
         req.cedula = payload.cedula
         req.name = payload.name
         req.typeUser = payload.typeUser
+        req.direccion = payload.direccion
 
     } catch (error) {
         return res.status(401).json({
