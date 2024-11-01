@@ -433,3 +433,45 @@ export const toggleUsuarioHabilitado = async (req, res) => {
         res.status(500).json({ message: "Ocurrió un error al actualizar el estado del usuario." });
     }
 };
+
+export const saveExperiences = async (req, res) => {
+    try {
+        const { experiences } = req.body;
+
+        for (const experience of experiences) {
+            const { id, cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities } = experience;
+
+            if (id) {
+                // Actualizar experiencia existente
+                const query = `
+                    UPDATE experiencia 
+                    SET 
+                        hasExperience = ?, 
+                        title = ?, 
+                        company = ?, 
+                        startDate = ?, 
+                        isCurrent = ?, 
+                        endDate = ?, 
+                        responsibilities = ? 
+                    WHERE id = ? AND cedula = ?
+                `;
+                const values = [hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, id, cedula];
+                await pool.query(query, values);
+            } else {
+                // Insertar nueva experiencia
+                const query = `
+                    INSERT INTO experiencia (cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+                const values = [cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities];
+                await pool.query(query, values);
+            }
+        }
+
+        res.json({ message: 'Experiencias guardadas/actualizadas correctamente' });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+}

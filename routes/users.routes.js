@@ -15,7 +15,8 @@ import {
     createServiceRequest,
     getServices,
     setRating,
-    toggleUsuarioHabilitado
+    toggleUsuarioHabilitado,
+    saveExperiences
 } from '../controllers/users.controllers.js';
 import {validarJWT} from '../middlewares/validar-jwt.js'
 
@@ -37,5 +38,6 @@ router.post('/service', createServiceRequest)
 router.get('/get-services', getServices)
 router.post('/set-rating', setRating)
 router.put('/toggle-users', toggleUsuarioHabilitado);
+router.post('/save-experience', saveExperiences)
 
 export default router;
