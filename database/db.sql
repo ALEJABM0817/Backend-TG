@@ -11,7 +11,7 @@ CREATE TABLE usuarios (
 );
 
 CREATE TABLE ofertantes (
-    cedula INTEGER PRIMARY KEY NOT NULL,
+    cedula BIGINT PRIMARY KEY NOT NULL,
     complete_info BOOLEAN NOT NULL DEFAULT FALSE,
     photo VARCHAR(255),
     areas VARCHAR(255) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE ofertantes (
 
 CREATE TABLE experiencia (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    cedula INTEGER,
+    cedula BIGINT,
     hasExperience BOOLEAN NOT NULL,
     title VARCHAR(100),
     company VARCHAR(100),
