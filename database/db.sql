@@ -10,12 +10,6 @@ CREATE TABLE usuarios (
     habilitado BOOLEAN NOT NULL DEFAULT TRUE
 );
 
--- ALTER TABLE usuarios
--- ADD COLUMN habilitado BOOLEAN NOT NULL DEFAULT TRUE;
-
--- INSERT INTO usuarios (cedula, nombre, direccion, telefono, email, password, typeUser, habilitado)
--- VALUES (1234567890, 'Admin User', '123 Admin St', '1234567890', 'admin@example.com', 'securepassword', 'admin', 1);
-
 CREATE TABLE ofertantes (
     cedula INTEGER PRIMARY KEY NOT NULL,
     complete_info BOOLEAN NOT NULL DEFAULT FALSE,
@@ -94,3 +88,10 @@ CREATE TABLE rating (
     FOREIGN KEY (cedula_solicitante) REFERENCES usuarios(cedula),
     FOREIGN KEY (cedula_ofertante) REFERENCES usuarios(cedula)
 );
+
+INSERT INTO usuarios (cedula, nombre, direccion, telefono, email, password, typeUser, habilitado)
+VALUES (1234567890, 'Admin User', '123 Admin St', '1234567890', 'admin@example.com', 'securepassword', 'admin', 1);
+
+INSERT INTO servicios (nombre) VALUES ('Jardineria'), ('Plomeria'), ('Limpieza'), ('Lavanderia');
+
+INSERT INTO tipos_tarifas (nombre) VALUES ('media_jornada'), ('jornada_completa');

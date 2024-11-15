@@ -18,4 +18,4 @@ app.use(usersRoutes);
 app.use(imagesRoutes);
 app.use(express.static(path.join(__dirname, 'assets')));
 app.listen(PORT);
-console.log('Server')
+console.log('Server', PORT)

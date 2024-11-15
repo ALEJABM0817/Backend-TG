@@ -1,2 +1,5 @@
 node_modules
 assets/uploads
+.env.production
+.env.development
+.env.example
