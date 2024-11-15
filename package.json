@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "build": "echo 'Build script not defined'",
-    "start": "index.js"
+    "start": "chmod +x index.js && node index.js"
   },
   "keywords": [],
   "author": "",
