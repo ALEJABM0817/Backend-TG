@@ -11,7 +11,7 @@ COPY package.json yarn.lock ./
 ARG CACHE_VERSION=1
 
 # Install dependencies using yarn
-RUN --mount=type=cache,id=yarn-cache-${CACHE_VERSION}-my-cache-id,target=/usr/local/share/.cache/yarn/v6 yarn install --frozen-lockfile
+RUN --mount=type=cache,id=yarn-cache-my-static-cache-id,target=/usr/local/share/.cache/yarn/v6 yarn install --frozen-lockfile
 
 # Copy the rest of the application code to the working directory
 COPY . .
