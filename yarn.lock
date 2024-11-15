@@ -1120,20 +1120,6 @@ supports-color@^5.5.0:
   dependencies:
     has-flag "^3.0.0"
 
-"tg-backend@file:":
-  version "1.0.0"
-  resolved "file:"
-  dependencies:
-    cors "^2.8.5"
-    dotenv "^16.4.5"
-    express "^4.19.2"
-    jsonwebtoken "^9.0.2"
-    morgan "^1.10.0"
-    multer "^1.4.5-lts.1"
-    mysql2 "^3.9.7"
-    sharp "^0.33.5"
-    tg-backend "file:"
-
 to-regex-range@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/to-regex-range/-/to-regex-range-5.0.1.tgz"
