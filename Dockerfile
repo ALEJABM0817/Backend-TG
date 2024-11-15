@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy package.json and yarn.lock to the working directory
 COPY package.json yarn.lock ./
 
+# Define cache version
+ARG CACHE_VERSION=1
+
 # Install dependencies using yarn
 RUN --mount=type=cache,id=yarn-cache-${CACHE_VERSION}-my-cache-id,target=/usr/local/share/.cache/yarn/v6 yarn install --frozen-lockfile
 
