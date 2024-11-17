@@ -281,8 +281,6 @@ export const getTarifas = async (req, res) => {
             return acc;
         }, []);
 
-        console.log(grouped);
-
         res.json(grouped);
     } catch (error) {
         res.status(500).json({
@@ -358,8 +356,6 @@ export const createServiceRequest = async (req, res) => {
 export const getServices = async (req, res) => {
     try {
         const { cedula, typeuser } = req.headers;
-
-        console.log(cedula, typeuser);
 
         let query = 
             "SELECT s.id, s.idOfertante, s.idSolicitante, s.servicio_id, s.tipo_tarifa_id, s.plan, s.precio, s.comentario, s.status, " +
