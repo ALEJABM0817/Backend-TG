@@ -14,7 +14,7 @@ CREATE TABLE ofertantes (
     cedula BIGINT PRIMARY KEY NOT NULL,
     complete_info BOOLEAN NOT NULL DEFAULT FALSE,
     photo VARCHAR(255),
-    areas VARCHAR(255) NOT NULL,
+    areas VARCHAR(255) NOT NULL DEFAULT '[]',
     FOREIGN KEY (cedula) REFERENCES usuarios(cedula)
 );
 
