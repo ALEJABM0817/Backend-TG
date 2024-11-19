@@ -195,17 +195,18 @@ export const getCompleteInfo = async (req, res) => {
 export const getOfertantantes = async (req, res) => {
     try {
         const [result] = await pool.query(
-            'SELECT o.*, AVG(r.calificacion) as promedio_calificacion ' +
+            'SELECT o.*, u.nombre, AVG(r.calificacion) as promedio_calificacion ' +
             'FROM ofertantes o ' +
+            'LEFT JOIN usuarios u ON o.cedula = u.cedula ' +
             'LEFT JOIN rating r ON o.cedula = r.cedula_ofertante ' +
-            'GROUP BY o.cedula'
+            'GROUP BY o.cedula, u.nombre'
         );
         res.json(result);
 
     } catch (error) {
         return res.status(500).json({
             message: error.message
-        })
+        });
     }
 }
 
