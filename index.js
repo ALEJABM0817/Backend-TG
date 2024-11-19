@@ -19,10 +19,12 @@ app.use(indexRoutes);
 app.use(usersRoutes);
 app.use(imagesRoutes);
 
-app.use(express.static(path.join(__dirname, 'build')));
+// Servir los archivos estáticos del directorio public
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Ruta comodín para manejar rutas del lado del cliente
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {
