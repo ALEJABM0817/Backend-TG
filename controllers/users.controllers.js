@@ -214,17 +214,23 @@ export const getOfertanteForCV = async (req, res) => {
     try {
         const cedula = req.body.cedula;
         const [rows] = await pool.query(`
-            SELECT o.photo, e.*, u.nombre
-            FROM ofertantes o
-            LEFT JOIN experiencia e ON o.cedula = e.cedula
-            LEFT JOIN usuarios u ON o.cedula = u.cedula
-            WHERE o.cedula = ?
+            SELECT o.photo, e.*, u.nombre, AVG(r.calificacion) as promedio_calificacion, 
+                    GROUP_CONCAT(r.comentario SEPARATOR '||') as comentarios, 
+                    GROUP_CONCAT(us.nombre SEPARATOR '||') as nombres_solicitantes
+                FROM ofertantes o
+                LEFT JOIN experiencia e ON o.cedula = e.cedula
+                LEFT JOIN usuarios u ON o.cedula = u.cedula
+                LEFT JOIN rating r ON o.cedula = r.cedula_ofertante
+                LEFT JOIN usuarios us ON r.cedula_solicitante = us.cedula
+                WHERE o.cedula = ?
+                GROUP BY o.cedula, e.id, u.nombre
         `, [cedula]);
     
         const result = {
             cedula: cedula,
             photo: rows[0]?.photo,
             nombre: rows[0]?.nombre,
+            promedio_calificacion: rows[0]?.promedio_calificacion,
             hasExperience: rows[0]?.hasExperience,
             experiences: rows.map(row => ({
                 id: row.id,
@@ -234,14 +240,18 @@ export const getOfertanteForCV = async (req, res) => {
                 isCurrent: row.isCurrent,
                 endDate: row.endDate,
                 responsibilities: row.responsibilities
-            }))
+            })),
+            comentarios: rows[0]?.comentarios ? rows[0].comentarios.split('||').map((comentario, index) => ({
+                nombre: rows[0].nombres_solicitantes.split('||')[index],
+                comentario: comentario
+            })) : []
         };
 
         res.json(result);
     } catch (error) {
-        req.status(500).json({
+        res.status(500).json({
             message: error.message
-        })
+        });
     }
 }
 
