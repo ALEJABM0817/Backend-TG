@@ -18,19 +18,34 @@
     cd Backend-TG
     ```
 
-2. Copia el archivo `.env.example` a `.env.development`:
+2. Crea un archivo `.env` con el siguiente contenido:
 
-    ```sh
-    cp .env.example .env.development
+    ```properties
+    SECRET_JWT_SEED=Palabr@-S3creTa!!
+    DB_HOST=localhost
+    DB_PORT=3306
+    DB_USER=root
+    DB_PASSWORD=root
+    DB_NAME=tg_backend
+
+    MYSQL_ROOT_PASSWORD=root
+    MYSQL_DATABASE=tg_backend
+    MYSQL_USER=root
+    MYSQL_PASSWORD=root
+
+    EMAIL_USER=homehelpersco1@gmail.com
+    EMAIL_PASS=tgfr zuha neef ynct
+
+    URL_FRONTEND=http://localhost:5173
     ```
 
-3. Copia el archivo `.env.development` a `.env`:
+3. Modifica `.env` con tus valores locales si es necesario.
+
+4. Asegúrate de que Docker esté en funcionamiento. Puedes iniciar Docker Desktop en Windows o macOS, o usar el siguiente comando en Linux:
 
     ```sh
-    cp .env.development .env
+    sudo systemctl start docker
     ```
-
-4. Modifica `.env.development` con tus valores locales si es necesario.
 
 5. Construye y levanta los servicios de Docker Compose:
 
