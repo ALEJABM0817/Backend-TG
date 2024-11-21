@@ -41,25 +41,51 @@
 
 3. Modifica `.env` con tus valores locales si es necesario.
 
-4. Asegúrate de que Docker esté en funcionamiento. Puedes iniciar Docker Desktop en Windows o macOS, o usar el siguiente comando en Linux:
+4. Construye y levanta los servicios de Docker Compose:
+    Asegúrate de que Docker esté en funcionamiento. Puedes iniciar Docker Desktop en Windows o macOS, o usar el siguiente comando en Linux:
 
     ```sh
     sudo systemctl start docker
     ```
 
-5. Construye y levanta los servicios de Docker Compose:
+5. Crea un archivo `Dockerfile` con el siguiente contenido:
+
+    ```dockerfile
+    # Usa una imagen base de Node.js
+    FROM node:14
+
+    # Establece el directorio de trabajo en el contenedor
+    WORKDIR /app
+
+    # Copia el archivo package.json y yarn.lock al contenedor
+    COPY package.json yarn.lock ./
+
+    # Instala las dependencias del proyecto
+    RUN yarn install
+
+    # Copia el resto del código de la aplicación al contenedor
+    COPY . .
+
+    # Expone el puerto en el que la aplicación se ejecutará
+    EXPOSE 3000
+
+    # Comando para iniciar la aplicación
+    CMD ["yarn", "dev"]
+    ```
+
+    Luego de crear el archivo ejecuta el siguiente comando
 
     ```sh
     docker-compose up -d
     ```
 
-6. Instala las dependencias del proyecto:
+5. Instala las dependencias del proyecto:
 
     ```sh
     yarn install
     ```
 
-7. Inicia la aplicación en modo desarrollo:
+6. Inicia la aplicación en modo desarrollo:
 
     ```sh
     yarn dev
