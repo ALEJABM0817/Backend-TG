@@ -4,10 +4,12 @@ CREATE TABLE usuarios (
     direccion VARCHAR(100) NOT NULL,
     telefono VARCHAR(10) NOT NULL,
     email VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     typeUser VARCHAR(50) NOT NULL,
-    habilitado BOOLEAN NOT NULL DEFAULT TRUE
+    habilitado BOOLEAN NOT NULL DEFAULT TRUE,
+    resetPasswordToken VARCHAR(255),
+    resetPasswordExpires BIGINT
 );
 
 CREATE TABLE ofertantes (
@@ -95,3 +97,10 @@ VALUES (1234567890, 'Admin User', '123 Admin St', '1234567890', 'admin@example.c
 INSERT INTO servicios (nombre) VALUES ('Jardineria'), ('Plomeria'), ('Limpieza'), ('Lavanderia');
 
 INSERT INTO tipos_tarifas (nombre) VALUES ('media_jornada'), ('jornada_completa');
+
+ALTER TABLE usuarios
+ADD COLUMN resetPasswordToken VARCHAR(255),
+ADD COLUMN resetPasswordExpires BIGINT;
+
+ALTER TABLE usuarios
+MODIFY COLUMN password VARCHAR(255);
