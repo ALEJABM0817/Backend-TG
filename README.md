@@ -79,7 +79,7 @@
     yarn install
     ```
 
-7. Inicia la aplicación en modo desarrollo:
+6. Inicia la aplicación en modo desarrollo:
 
     ```sh
     yarn dev

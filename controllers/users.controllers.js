@@ -1,5 +1,9 @@
 import { pool } from "../db.js"
 import { generarJWT } from '../helpers/jwt.js';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+import bcrypt from 'bcrypt';
+
 export const getUsers = async (req, res) => {
     try {
         const [result] = await pool.query("SELECT * FROM usuarios WHERE typeUser != 'admin' ORDER BY createdAt ASC");
@@ -24,26 +28,25 @@ export const getUser = async (req, res) => {
             })
         }
 
-        [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ? AND password = ?', [cedula, password]);
+        const user = result[0];
 
-        if (!result.length) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
             return res.status(404).json({
                 message: "Credenciales invalidas"
-            })
+            });
         }
 
-        [result] = await pool.query('SELECT * FROM usuarios WHERE cedula = ? AND password = ? AND habilitado = 1', [cedula, password]);
-
-        if (!result.length) {
+        if (!user.habilitado) {
             return res.status(403).json({
                 message: "Usuario deshabilitado"
             });
         }
 
-        const token = await generarJWT(result[0].cedula, result[0].nombre, result[0].typeUser, result[0].direccion);
+        const token = await generarJWT(user.cedula, user.nombre, user.typeUser, user.direccion);
 
         res.json({
-            ...result[0],
+            ...user,
             token
         });
 
@@ -75,7 +78,7 @@ export const getUserData = async (req, res) => {
 
 export const createUser = async (req, res) => {
     try {
-        const { cedula, nombre, direccion, telefono, email, password, typeUser} = req.body;
+        const { cedula, nombre, direccion, telefono, email, password, typeUser } = req.body;
         const values = req.body;
         const isEmpty = Object.values(values).some(x => (x === ''));
 
@@ -83,14 +86,17 @@ export const createUser = async (req, res) => {
             throw new Error("Los campos son obligatorios");
         }
 
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const [result] = await pool.query(
             "INSERT INTO usuarios(cedula, nombre, direccion, telefono, email, password, typeUser) VALUES (?, ?, ?, ?, ?, ?, ?)",
             [
-                cedula, nombre, direccion, telefono, email, password, typeUser
+                cedula, nombre, direccion, telefono, email, hashedPassword, typeUser
             ]
         );
 
-        if(typeUser === 'ofertante') {
+        if (typeUser === 'ofertante') {
             await pool.query(
                 "INSERT INTO ofertantes(cedula) VALUES (?)",
                 [
@@ -103,7 +109,7 @@ export const createUser = async (req, res) => {
 
         res.json(
             {
-                cedula, nombre, direccion, telefono, email, password, token, typeUser
+                cedula, nombre, direccion, telefono, email, token, typeUser
             }
         )
 
@@ -214,17 +220,23 @@ export const getOfertanteForCV = async (req, res) => {
     try {
         const cedula = req.body.cedula;
         const [rows] = await pool.query(`
-            SELECT o.photo, e.*, u.nombre
-            FROM ofertantes o
-            LEFT JOIN experiencia e ON o.cedula = e.cedula
-            LEFT JOIN usuarios u ON o.cedula = u.cedula
-            WHERE o.cedula = ?
+            SELECT o.photo, e.*, u.nombre, AVG(r.calificacion) as promedio_calificacion, 
+                    GROUP_CONCAT(r.comentario SEPARATOR '||') as comentarios, 
+                    GROUP_CONCAT(us.nombre SEPARATOR '||') as nombres_solicitantes
+                FROM ofertantes o
+                LEFT JOIN experiencia e ON o.cedula = e.cedula
+                LEFT JOIN usuarios u ON o.cedula = u.cedula
+                LEFT JOIN rating r ON o.cedula = r.cedula_ofertante
+                LEFT JOIN usuarios us ON r.cedula_solicitante = us.cedula
+                WHERE o.cedula = ?
+                GROUP BY o.cedula, e.id, u.nombre
         `, [cedula]);
     
         const result = {
             cedula: cedula,
             photo: rows[0]?.photo,
             nombre: rows[0]?.nombre,
+            promedio_calificacion: rows[0]?.promedio_calificacion,
             hasExperience: rows[0]?.hasExperience,
             experiences: rows.map(row => ({
                 id: row.id,
@@ -234,14 +246,18 @@ export const getOfertanteForCV = async (req, res) => {
                 isCurrent: row.isCurrent,
                 endDate: row.endDate,
                 responsibilities: row.responsibilities
-            }))
+            })),
+            comentarios: rows[0]?.comentarios ? rows[0].comentarios.split('||').map((comentario, index) => ({
+                nombre: rows[0].nombres_solicitantes.split('||')[index],
+                comentario: comentario
+            })) : []
         };
 
         res.json(result);
     } catch (error) {
-        req.status(500).json({
+        res.status(500).json({
             message: error.message
-        })
+        });
     }
 }
 
@@ -470,5 +486,68 @@ export const saveExperiences = async (req, res) => {
         return res.status(500).json({
             message: error.message
         });
+    }
+}
+
+export const requestPasswordReset = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const [user] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const token = crypto.randomBytes(20).toString('hex');
+        const tokenExpiration = Date.now() + 3600000; // 1 hora
+
+        await pool.query('UPDATE usuarios SET resetPasswordToken = ?, resetPasswordExpires = ? WHERE email = ?', [token, tokenExpiration, email]);
+
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            to: email,
+            from: process.env.EMAIL_USER,
+            subject: 'Recuperación de contraseña',
+            html: `
+                <p>Recibiste este correo porque tú (u otra persona) solicitó restablecer la contraseña de tu cuenta.</p>
+                <p>Por favor, haz clic en el siguiente enlace, o pégalo en tu navegador para completar el proceso:</p>
+                <a href="${process.env.URL_FRONTEND}/reset-password/${token}">${process.env.URL_FRONTEND}/reset-password/${token}</a>
+                <p>Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'Correo de recuperación de contraseña enviado' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    try {
+        const [user] = await pool.query('SELECT * FROM usuarios WHERE resetPasswordToken = ? AND resetPasswordExpires > ?', [token, Date.now()]);
+        if (user.length === 0) {
+            return res.status(400).json({ message: 'Token de recuperación de contraseña inválido o expirado' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        await pool.query('UPDATE usuarios SET password = ?, resetPasswordToken = NULL, resetPasswordExpires = NULL WHERE email = ?', [hashedPassword, user[0].email]);
+
+        res.status(200).json({ message: 'Contraseña restablecida correctamente' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }
