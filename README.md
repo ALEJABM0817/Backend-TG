@@ -15,8 +15,9 @@
 1. Clona el repositorio:
 
     ```sh
-    git clone https://github.com/tu-usuario/Backend-TG.git
+    git clone https://github.com/ALEJABM0817/Backend-TG.git
     cd Backend-TG
+    code .
     ```
 
 2. Crea un archivo `.env` y copia el contenido de `.env.example`:
