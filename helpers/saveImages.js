@@ -39,14 +39,14 @@ router.post('/upload-data', upload.single('photo'), async (req, res) => {
 
         if (hasExperienceInt) {
             for (let exp of experiences) {
-                const { title, company, startDate, isCurrent, endDate, responsibilities } = exp;
+                const { title, company, startDate, isCurrent, endDate, responsibilities, telefono } = exp;
                 const isCurrentInt = isCurrent === 'true' ? 1 : 0;
                 const endDateFinal = isCurrentInt ? null : endDate;
-                await pool.query('INSERT INTO experiencia (cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE hasExperience = VALUES(hasExperience), title = VALUES(title), company = VALUES(company), startDate = VALUES(startDate), isCurrent = VALUES(isCurrent), endDate = VALUES(endDate), responsibilities = VALUES(responsibilities)',
-                    [cedula, hasExperienceInt, title, company, startDate, isCurrentInt, endDateFinal, responsibilities]);
+                await pool.query('INSERT INTO experiencia (cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, telefono) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE hasExperience = VALUES(hasExperience), title = VALUES(title), company = VALUES(company), startDate = VALUES(startDate), isCurrent = VALUES(isCurrent), endDate = VALUES(endDate), responsibilities = VALUES(responsibilities)',
+                    [cedula, hasExperienceInt, title, company, startDate, isCurrentInt, endDateFinal, responsibilities, telefono]);
             }
         } else {
-            await pool.query('INSERT INTO experiencia (cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities) VALUES (?, ?, NULL, NULL, NULL, NULL, NULL, NULL) ON DUPLICATE KEY UPDATE hasExperience = VALUES(hasExperience), title = VALUES(title), company = VALUES(company), startDate = VALUES(startDate), isCurrent = VALUES(isCurrent), endDate = VALUES(endDate), responsibilities = VALUES(responsibilities)',
+            await pool.query('INSERT INTO experiencia (cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, telefono) VALUES (?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL) ON DUPLICATE KEY UPDATE hasExperience = VALUES(hasExperience), title = VALUES(title), company = VALUES(company), startDate = VALUES(startDate), isCurrent = VALUES(isCurrent), endDate = VALUES(endDate), responsibilities = VALUES(responsibilities)',
                 [cedula, hasExperienceInt]);
         }
 

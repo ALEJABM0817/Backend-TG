@@ -30,6 +30,7 @@ CREATE TABLE experiencia (
     isCurrent BOOLEAN,
     endDate DATE,
     responsibilities TEXT,
+    telefono VARCHAR(100),
     FOREIGN KEY (cedula) REFERENCES usuarios(cedula)
 );
 

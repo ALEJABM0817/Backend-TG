@@ -18,7 +18,8 @@ import {
     toggleUsuarioHabilitado,
     saveExperiences,
     requestPasswordReset,
-    resetPassword
+    resetPassword,
+    deleteService
 } from '../controllers/users.controllers.js';
 import {validarJWT} from '../middlewares/validar-jwt.js'
 
@@ -43,5 +44,6 @@ router.put('/toggle-users', toggleUsuarioHabilitado);
 router.post('/save-experience', saveExperiences)
 router.post('/request-password-reset', requestPasswordReset);
 router.post('/reset-password/:token', resetPassword);
+router.post('/service-delete', deleteService);
 
 export default router;

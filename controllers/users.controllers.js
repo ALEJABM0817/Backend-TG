@@ -245,7 +245,8 @@ export const getOfertanteForCV = async (req, res) => {
                 startDate: row.startDate,
                 isCurrent: row.isCurrent,
                 endDate: row.endDate,
-                responsibilities: row.responsibilities
+                responsibilities: row.responsibilities,
+                telefono: row.telefono
             })),
             comentarios: rows[0]?.comentarios ? rows[0].comentarios.split('||').map((comentario, index) => ({
                 nombre: rows[0].nombres_solicitantes.split('||')[index],
@@ -452,7 +453,7 @@ export const saveExperiences = async (req, res) => {
         const { experiences } = req.body;
 
         for (const experience of experiences) {
-            const { id, cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities } = experience;
+            const { id, cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, telefono } = experience;
 
             if (id) {
                 // Actualizar experiencia existente
@@ -465,18 +466,19 @@ export const saveExperiences = async (req, res) => {
                         startDate = ?, 
                         isCurrent = ?, 
                         endDate = ?, 
-                        responsibilities = ? 
+                        responsibilities = ?,
+                        telefono = ? 
                     WHERE id = ? AND cedula = ?
                 `;
-                const values = [hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, id, cedula];
+                const values = [hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, telefono, id, cedula];
                 await pool.query(query, values);
             } else {
                 // Insertar nueva experiencia
                 const query = `
-                    INSERT INTO experiencia (cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO experiencia (cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, telefono) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
-                const values = [cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities];
+                const values = [cedula, hasExperience, title, company, startDate, isCurrent, endDate, responsibilities, telefono];
                 await pool.query(query, values);
             }
         }
@@ -495,7 +497,7 @@ export const requestPasswordReset = async (req, res) => {
     try {
         const [user] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
         if (user.length === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
+            return res.status(404).json({ message: 'El correo introducido no existe' });
         }
 
         const token = crypto.randomBytes(20).toString('hex');
@@ -551,3 +553,18 @@ export const resetPassword = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+export const deleteService = async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        await pool.query('DELETE FROM fechas_solicitudes WHERE solicitud_id = ?', [id]);
+
+        await pool.query('DELETE FROM solicitudes WHERE id = ?', [id]);
+
+        res.status(200).json({ message: 'Servicio eliminado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};
